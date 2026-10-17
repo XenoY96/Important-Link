@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0d141b">
+<title>Important Link</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<!-- ===================== DESIGN (edit colors and styles here) ===================== -->
+<style>
+:root {
+  --bg: #0d141b;
+  --surface: #131d27;
+  --surface-hi: #182532;
+  --ink: #d3e0ea;
+  --muted: #8196a8;
+  --line: #223344;
+  --accent: #4cc9c0;
+  --accent-soft: rgba(76, 201, 192, 0.14);
+  --glow: rgba(76, 201, 192, 0.22);
+  --amber: #e0b15a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; background: var(--bg); overflow-x: hidden; max-width: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Bengali", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(76, 201, 192, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 201, 192, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* ---------- header ---------- */
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(13, 20, 27, 0.92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 8px;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+/* thin loading line: runs whenever data is being fetched */
+.loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.loader::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform: translateX(-100%);
+}
+
+.top.loading .loader { opacity: 1; }
+.top.loading .loader::before { animation: slide 1.1s linear infinite; }
+
+@keyframes slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+
+/* one soft light sweep along the header edge when the page opens */
+.top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  animation: sweep 1.6s ease-out 0.2s 1 forwards;
+}
+
+@keyframes sweep {
+  0% { transform: translateX(-100%); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translateX(250%); opacity: 0; }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 96px;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-height: 36px;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.refresh:active { background: var(--accent-soft); border-color: var(--accent); }
+.refresh:disabled { cursor: default; border-color: var(--accent); }
+
+.refresh.busy::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.search {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-height: 48px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search::placeholder { color: var(--muted); }
+
+.search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 0 4px;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-height: 36px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.25s, border-color 0.25s, background-color 0.25s;
+}
+
+.chip[aria-selected="true"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* live indicator + status line */
+.live-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  min-height: 24px;
+}
+
+.live {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 9px 2px 8px;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.live::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.live.live-on { color: var(--accent); border-color: rgba(76, 201, 192, 0.4); }
+.live.live-on::before { animation: pulse 2.2s ease-out infinite; }
+
+.live.sync { color: var(--accent); border-color: rgba(76, 201, 192, 0.4); }
+.live.sync::before { animation: blink 0.9s ease-in-out infinite; }
+
+.live.off::before { background: var(--amber); }
+.live.off { color: var(--amber); border-color: rgba(224, 177, 90, 0.4); }
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(76, 201, 192, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(76, 201, 192, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 201, 192, 0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.status {
+  margin: 0;
+  min-width: 0;
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* ---------- list ---------- */
+
+main { padding: 4px 0 24px; }
+
+.list { list-style: none; margin: 0; padding: 12px 16px 0; }
+
+.list li { margin-bottom: 10px; }
+
+/* cards fill in smoothly when data arrives */
+.list li.enter { animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.row {
+  position: relative;
+  display: block;
+  padding: 14px 16px 14px 18px;
+  color: inherit;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--surface-hi), var(--surface));
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.row:active { transform: scale(0.985); }
+
+.row.tapped {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 22px var(--glow);
+  transform: scale(0.985);
+}
+
+.name {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.meta { display: flex; margin-top: 8px; }
+
+.tag {
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.empty {
+  margin: 32px 16px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* placeholder cards while data is loading */
+.list li.skel {
+  padding: 16px 16px 12px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 8px;
+}
+
+.sk {
+  height: 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #1a2733 25%, #253a4c 50%, #1a2733 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.sk-a { width: 52%; height: 14px; }
+.sk-b { width: 86%; }
+.sk-c { width: 26%; height: 10px; margin-bottom: 4px; }
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ---------- redirect animation ---------- */
+
+.jump {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 11, 16, 0.92);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.jump.show { opacity: 1; pointer-events: auto; }
+
+.jump-box {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  padding: 28px 22px;
+  text-align: center;
+  transform: translateY(8px) scale(0.98);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.jump.show .jump-box { transform: none; }
+
+.jump-box::before,
+.jump-box::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--accent);
+  opacity: 0.8;
+}
+.jump-box::before { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.jump-box::after { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+.jump-label {
+  margin: 0 0 8px;
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.jump-name {
+  margin: 0 0 20px;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-shadow: 0 0 18px var(--glow);
+  overflow-wrap: anywhere;
+}
+
+.jump-bar {
+  position: relative;
+  height: 3px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.jump-bar span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(90deg, var(--accent), #9ff0e9);
+  border-radius: 3px;
+  box-shadow: 0 0 10px var(--glow);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.jump.show .jump-bar span { animation: fill 0.82s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
+
+@keyframes fill { to { transform: scaleX(1); } }
+
+.jump-sub {
+  margin: 14px 0 0;
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* ---------- misc ---------- */
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (min-width: 720px) {
+  .top, main { max-width: 760px; margin-left: auto; margin-right: auto; }
+}
+
+/* Reduced-motion phones: drop the sliding and scaling only.
+   Loading indicators, fades and the redirect bar still run. */
+@media (prefers-reduced-motion: reduce) {
+  .top::after { animation: none; }
+  .list li.enter { animation: fade 0.4s ease both; }
+  .jump-box { transform: none; transition: none; }
+  .row, .row:active, .row.tapped { transform: none; }
+}
+</style>
+</head>
+<body>
+<header class="top" id="top">
+  <div class="loader" aria-hidden="true"></div>
+  <div class="bar">
+    <h1>Important Link</h1>
+    <button id="refresh" class="refresh" type="button" aria-label="Refresh list"><span id="refresh-label">Refresh</span></button>
+  </div>
+  <input id="search" class="search" type="search" placeholder="Search links" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search links">
+  <div id="chips" class="chips" role="tablist" aria-label="Categories"></div>
+  <div class="live-row">
+    <span id="live" class="live sync"><span id="live-label">Syncing</span></span>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </div>
+</header>
+<main>
+  <ul id="list" class="list"></ul>
+  <p id="empty" class="empty" hidden></p>
+</main>
+<div id="jump" class="jump" aria-hidden="true">
+  <div class="jump-box">
+    <p class="jump-label">Opening</p>
+    <p id="jump-name" class="jump-name"></p>
+    <div class="jump-bar"><span></span></div>
+    <p class="jump-sub">Redirecting…</p>
+  </div>
+</div>
+
+<!-- ===================== LOGIC (API URL is at the top of this block) ===================== -->
+<script>
+(function () {
+  'use strict';
+
+  // Your Apps Script web app URL (read-only backend)
+  var API_URL = 'https://script.google.com/macros/s/AKfycbx6Zps8wKcm1euUKbEtiY5FBBzxaBw5-918i0IOl7ghwp7f-mBijSN5mrTRUvnlVwuy/exec';
+  var CACHE_KEY = 'mylinks_cache_v1';
+  var POLL_MS = 60000;   // live auto-refresh while the page is open
+  var JUMP_MS = 900;     // redirect animation length (0.9 second)
+
+  var listEl = document.getElementById('list');
+  var emptyEl = document.getElementById('empty');
+  var chipsEl = document.getElementById('chips');
+  var searchEl = document.getElementById('search');
+  var statusEl = document.getElementById('status');
+  var refreshBtn = document.getElementById('refresh');
+  var refreshLabel = document.getElementById('refresh-label');
+  var topEl = document.getElementById('top');
+  var liveEl = document.getElementById('live');
+  var liveLabel = document.getElementById('live-label');
+  var jumpEl = document.getElementById('jump');
+  var jumpName = document.getElementById('jump-name');
+
+  var items = [];
+  var activeCategory = 'All';
+  var query = '';
+  var navigating = false;
+  var loading = false;
+  var lastUpdated = 0;
+  var statusMode = 'none'; // 'none' | 'ok' | 'offline'
+  var shownKeys = {};
+
+  // ---------- helpers ----------
+
+  function safeUrl(value) {
+    try {
+      var u = new URL(String(value));
+      if (u.protocol === 'http:' || u.protocol === 'https:') return u;
+    } catch (e) { /* invalid */ }
+    return null;
+  }
+
+  function sanitize(data) {
+    var out = [];
+    if (!data || !Array.isArray(data.items)) return out;
+    data.items.forEach(function (it) {
+      if (!it) return;
+      var u = safeUrl(it.link);
+      var name = String(it.name == null ? '' : it.name).trim();
+      if (!u || !name) return;
+      out.push({
+        name: name.slice(0, 120),
+        link: u.href,
+        host: u.hostname.replace(/^www\./, ''),
+        category: String(it.category == null ? '' : it.category).trim().slice(0, 60),
+        note: String(it.note == null ? '' : it.note).trim().slice(0, 300)
+      });
+    });
+    return out;
+  }
+
+  function keyOf(it) { return it.name + '|' + it.link; }
+
+  function saveCache(list) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), items: list }));
+    } catch (e) { /* storage full or blocked */ }
+  }
+
+  function loadCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (obj && Array.isArray(obj.items)) return obj;
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  function timeAgo(t) {
+    var s = Math.round((Date.now() - t) / 1000);
+    if (s < 5) return 'just now';
+    if (s < 60) return s + 's ago';
+    var m = Math.round(s / 60);
+    if (m < 60) return m + ' min ago';
+    var h = Math.round(m / 60);
+    if (h < 24) return h + ' h ago';
+    return Math.round(h / 24) + ' d ago';
+  }
+
+  function setLive(state) {
+    if (state === 'live') { liveEl.className = 'live live-on'; liveLabel.textContent = 'Live'; }
+    else if (state === 'sync') { liveEl.className = 'live sync'; liveLabel.textContent = 'Syncing'; }
+    else { liveEl.className = 'live off'; liveLabel.textContent = 'Offline'; }
+  }
+
+  function updateStatus() {
+    if (statusMode === 'ok') {
+      statusEl.textContent = items.length + (items.length === 1 ? ' link' : ' links') + ', updated ' + timeAgo(lastUpdated);
+    } else if (statusMode === 'offline') {
+      statusEl.textContent = lastUpdated
+        ? 'Showing saved list from ' + timeAgo(lastUpdated)
+        : 'Could not load links';
+    } else {
+      statusEl.textContent = '';
+    }
+  }
+
+  // ---------- rendering ----------
+
+  function categories() {
+    var seen = {};
+    var out = ['All'];
+    items.forEach(function (it) {
+      if (it.category && !seen[it.category]) {
+        seen[it.category] = true;
+        out.push(it.category);
+      }
+    });
+    return out;
+  }
+
+  function renderChips() {
+    var cats = categories();
+    if (cats.indexOf(activeCategory) === -1) activeCategory = 'All';
+    chipsEl.textContent = '';
+    cats.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', c === activeCategory ? 'true' : 'false');
+      b.textContent = c;
+      b.addEventListener('click', function () {
+        activeCategory = c;
+        renderChips();
+        renderList(false);
+      });
+      chipsEl.appendChild(b);
+    });
+  }
+
+  function matches(it) {
+    if (activeCategory !== 'All' && it.category !== activeCategory) return false;
+    if (!query) return true;
+    var hay = (it.name + ' ' + it.note + ' ' + it.category + ' ' + it.host).toLowerCase();
+    return query.split(/\s+/).every(function (w) { return hay.indexOf(w) !== -1; });
+  }
+
+  function showSkeleton() {
+    listEl.textContent = '';
+    emptyEl.hidden = true;
+    for (var i = 0; i < 5; i++) {
+      var li = document.createElement('li');
+      li.className = 'skel';
+      li.setAttribute('aria-hidden', 'true');
+      ['sk sk-a', 'sk sk-b', 'sk sk-c'].forEach(function (c) {
+        var d = document.createElement('div');
+        d.className = c;
+        li.appendChild(d);
+      });
+      listEl.appendChild(li);
+    }
+  }
+
+  // animateNew = true when fresh data arrives: only cards not seen before fill in with animation
+  function renderList(animateNew) {
+    listEl.textContent = '';
+    var shown = items.filter(matches);
+    var entering = 0;
+
+    shown.forEach(function (it) {
+      var li = document.createElement('li');
+      if (animateNew && !shownKeys[keyOf(it)]) {
+        li.className = 'enter';
+        li.style.animationDelay = (Math.min(entering, 12) * 45) + 'ms';
+        entering++;
+      }
+
+      var a = document.createElement('a');
+      a.className = 'row';
+      a.href = it.link;
+      a.rel = 'noopener noreferrer';
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        openWithAnimation(a, it);
+      });
+
+      var name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = it.name;
+      a.appendChild(name);
+
+      if (it.note) {
+        var note = document.createElement('span');
+        note.className = 'note';
+        note.textContent = it.note;
+        a.appendChild(note);
+      }
+
+      if (it.category) {
+        var meta = document.createElement('span');
+        meta.className = 'meta';
+        var tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = it.category;
+        meta.appendChild(tag);
+        a.appendChild(meta);
+      }
+
+      li.appendChild(a);
+      listEl.appendChild(li);
+    });
+
+    if (!items.length) {
+      emptyEl.textContent = statusMode === 'offline'
+        ? 'Could not load links. Check your internet and tap Refresh.'
+        : 'No links yet. Add rows in your Google Sheet.';
+      emptyEl.hidden = false;
+    } else if (!shown.length) {
+      emptyEl.textContent = 'No links match your search.';
+      emptyEl.hidden = false;
+    } else {
+      emptyEl.hidden = true;
+    }
+  }
+
+  function markShown() {
+    var next = {};
+    items.forEach(function (it) { next[keyOf(it)] = true; });
+    shownKeys = next;
+  }
+
+  function render(animateNew) {
+    renderChips();
+    renderList(animateNew);
+    markShown();
+  }
+
+  // ---------- tap animation, then redirect ----------
+
+  function openWithAnimation(row, it) {
+    if (navigating) return;
+    navigating = true;
+
+    row.classList.add('tapped');
+    jumpName.textContent = it.name;
+    jumpEl.setAttribute('aria-hidden', 'false');
+    // next frame, so the fade-in transition runs
+    requestAnimationFrame(function () { jumpEl.classList.add('show'); });
+
+    setTimeout(function () {
+      window.location.href = it.link;
+    }, JUMP_MS);
+  }
+
+  // When coming back with the Back button, reset the screen
+  window.addEventListener('pageshow', function () {
+    navigating = false;
+    jumpEl.classList.remove('show');
+    jumpEl.setAttribute('aria-hidden', 'true');
+    var tapped = document.querySelectorAll('.row.tapped');
+    for (var i = 0; i < tapped.length; i++) tapped[i].classList.remove('tapped');
+  });
+
+  // ---------- loading (live) ----------
+
+  function fetchWithTimeout(url, ms) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var timer = setTimeout(function () {
+        if (!done) { done = true; reject(new Error('timeout')); }
+      }, ms);
+      fetch(url, { method: 'GET', credentials: 'omit', redirect: 'follow', cache: 'no-store' })
+        .then(function (r) {
+          if (done) return;
+          done = true; clearTimeout(timer); resolve(r);
+        })
+        .catch(function (e) {
+          if (done) return;
+          done = true; clearTimeout(timer); reject(e);
+        });
+    });
+  }
+
+  function load() {
+    if (loading) return Promise.resolve();
+    loading = true;
+    topEl.classList.add('loading');
+    refreshBtn.disabled = true;
+    refreshBtn.classList.add('busy');
+    refreshLabel.textContent = 'Updating';
+    setLive('sync');
+    if (!items.length) showSkeleton();
+
+    return fetchWithTimeout(API_URL, 15000)
+      .then(function (r) {
+        if (!r.ok) throw new Error('http ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data || data.ok !== true) throw new Error('bad response');
+        items = sanitize(data);
+        saveCache(items);
+        lastUpdated = Date.now();
+        statusMode = 'ok';
+        render(true);
+        setLive('live');
+      })
+      .catch(function () {
+        statusMode = 'offline';
+        setLive('off');
+        render(false);
+      })
+      .then(function () {
+        updateStatus();
+        loading = false;
+        topEl.classList.remove('loading');
+        refreshBtn.disabled = false;
+        refreshBtn.classList.remove('busy');
+        refreshLabel.textContent = 'Refresh';
+      });
+  }
+
+  // ---------- events ----------
+
+  searchEl.addEventListener('input', function () {
+    query = searchEl.value.trim().toLowerCase();
+    renderList(false);
+  });
+
+  refreshBtn.addEventListener('click', load);
+
+  // keep the page live: refresh on a timer, when you return to the app, and when internet comes back
+  setInterval(function () {
+    if (document.visibilityState === 'visible' && navigator.onLine !== false && !navigating) load();
+  }, POLL_MS);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !navigating && Date.now() - lastUpdated > 15000) load();
+  });
+
+  window.addEventListener('online', function () { if (!navigating) load(); });
+
+  window.addEventListener('offline', function () {
+    statusMode = 'offline';
+    setLive('off');
+    updateStatus();
+  });
+
+  // keep "updated 12s ago" ticking
+  setInterval(updateStatus, 10000);
+
+  // ---------- start ----------
+
+  var cached = loadCache();
+  if (cached) {
+    items = sanitize({ items: cached.items });
+    lastUpdated = cached.t;
+    statusMode = 'ok';
+    render(true);
+    updateStatus();
+  }
+  load();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* offline shell optional */ });
+    });
+  }
+})();
+</script>
+</body>
+</html>
